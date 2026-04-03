@@ -1,27 +1,38 @@
 import { db } from '@/db';
-import { carriers, carrierInsurance } from '@/db/schema';
+import { carriers, carrierInsurance, carrierContacts } from '@/db/schema';
 import { eq, count, sql } from 'drizzle-orm';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle, XCircle, Truck, TrendingUp, Plus } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ScoreRing } from '@/components/ScoreRing';
 import { formatDate } from '@/lib/utils';
+import { RequestCertButton } from '@/components/RequestCertButton';
 
 async function getDashboardData() {
-  const [allCarriers, allInsurance] = await Promise.all([
+  const [allCarriers, allInsurance, allContacts] = await Promise.all([
     db.select().from(carriers),
     db
       .select({
         id: carrierInsurance.id,
         carrierId: carrierInsurance.carrierId,
         type: carrierInsurance.type,
+        policyNumber: carrierInsurance.policyNumber,
         expiryDate: carrierInsurance.expiryDate,
         status: carrierInsurance.status,
         carrierName: carriers.name,
       })
       .from(carrierInsurance)
       .leftJoin(carriers, eq(carrierInsurance.carrierId, carriers.id)),
+    db.select().from(carrierContacts),
   ]);
+
+  // Build primary contact email map: carrierId -> { name, email }
+  const primaryContactMap: Record<string, { name: string; email: string | null }> = {};
+  for (const c of allContacts) {
+    if (c.isPrimary || !primaryContactMap[c.carrierId]) {
+      primaryContactMap[c.carrierId] = { name: c.name, email: c.email ?? null };
+    }
+  }
 
   const now = new Date();
 
@@ -42,7 +53,7 @@ async function getDashboardData() {
     .sort((a, b) => (b.overallScore ?? 0) - (a.overallScore ?? 0))
     .slice(0, 5);
 
-  return { allCarriers, expired, expiringSoon, activeCount, avgScore, topCarriers };
+  return { allCarriers, expired, expiringSoon, activeCount, avgScore, topCarriers, primaryContactMap };
 }
 
 const typeLabels: Record<string, string> = {
@@ -53,7 +64,7 @@ const typeLabels: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-  const { allCarriers, expired, expiringSoon, activeCount, avgScore, topCarriers } =
+  const { allCarriers, expired, expiringSoon, activeCount, avgScore, topCarriers, primaryContactMap } =
     await getDashboardData();
 
   const uniqueExpiredCarriers = new Set(expired.map((i) => i.carrierId)).size;
@@ -89,16 +100,29 @@ export default async function DashboardPage() {
                 <div className="text-xs text-[#FF4444]/70 mt-0.5">
                   Review immediately before tendering loads to these carriers.
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[...new Map(expired.map((i) => [i.carrierId, i])).values()].slice(0, 4).map((i) => (
-                    <Link
-                      key={i.carrierId}
-                      href={`/carriers/${i.carrierId}`}
-                      className="text-xs text-[#FF4444] underline underline-offset-2 hover:no-underline"
-                    >
-                      {i.carrierName}
-                    </Link>
-                  ))}
+                <div className="mt-2 flex flex-wrap gap-2 items-center">
+                  {[...new Map(expired.map((i) => [i.carrierId, i])).values()].slice(0, 4).map((i) => {
+                    const contact = primaryContactMap[i.carrierId];
+                    return (
+                      <span key={i.carrierId} className="flex items-center gap-1.5">
+                        <Link
+                          href={`/carriers/${i.carrierId}`}
+                          className="text-xs text-[#FF4444] underline underline-offset-2 hover:no-underline"
+                        >
+                          {i.carrierName}
+                        </Link>
+                        <RequestCertButton
+                          variant="compact"
+                          carrierName={i.carrierName ?? ''}
+                          contactEmail={contact?.email}
+                          contactName={contact?.name}
+                          insuranceType={i.type}
+                          policyNumber={i.policyNumber}
+                          expiryDate={i.expiryDate}
+                        />
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -114,16 +138,29 @@ export default async function DashboardPage() {
                 <div className="text-xs text-[#FFAA00]/70 mt-0.5">
                   Request updated certificates before expiration.
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[...new Map(expiringSoon.map((i) => [i.carrierId, i])).values()].slice(0, 4).map((i) => (
-                    <Link
-                      key={i.carrierId}
-                      href={`/carriers/${i.carrierId}`}
-                      className="text-xs text-[#FFAA00] underline underline-offset-2 hover:no-underline"
-                    >
-                      {i.carrierName}
-                    </Link>
-                  ))}
+                <div className="mt-2 flex flex-wrap gap-2 items-center">
+                  {[...new Map(expiringSoon.map((i) => [i.carrierId, i])).values()].slice(0, 4).map((i) => {
+                    const contact = primaryContactMap[i.carrierId];
+                    return (
+                      <span key={i.carrierId} className="flex items-center gap-1.5">
+                        <Link
+                          href={`/carriers/${i.carrierId}`}
+                          className="text-xs text-[#FFAA00] underline underline-offset-2 hover:no-underline"
+                        >
+                          {i.carrierName}
+                        </Link>
+                        <RequestCertButton
+                          variant="compact"
+                          carrierName={i.carrierName ?? ''}
+                          contactEmail={contact?.email}
+                          contactName={contact?.name}
+                          insuranceType={i.type}
+                          policyNumber={i.policyNumber}
+                          expiryDate={i.expiryDate}
+                        />
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -226,23 +263,34 @@ export default async function DashboardPage() {
                 .slice(0, 6)
                 .map((ins) => {
                   const isExpired = new Date(ins.expiryDate) < new Date();
+                  const contact = primaryContactMap[ins.carrierId];
                   return (
-                    <Link
+                    <div
                       key={ins.id}
-                      href={`/carriers/${ins.carrierId}`}
-                      className="flex items-start gap-3 px-4 py-3.5 hover:bg-[#0C1528] transition-colors"
+                      className="flex items-center gap-2 px-4 py-3 hover:bg-[#0C1528] transition-colors"
                     >
-                      <div className={`mt-0.5 h-2 w-2 rounded-full flex-shrink-0 ${isExpired ? 'bg-[#FF4444]' : 'bg-[#FFAA00]'}`} />
-                      <div className="flex-1 min-w-0">
+                      <div className={`h-2 w-2 rounded-full flex-shrink-0 ${isExpired ? 'bg-[#FF4444]' : 'bg-[#FFAA00]'}`} />
+                      <Link href={`/carriers/${ins.carrierId}`} className="flex-1 min-w-0">
                         <div className="text-xs font-medium text-white truncate">{ins.carrierName}</div>
                         <div className="text-xs text-[#8B95A5]">
                           {typeLabels[ins.type] ?? ins.type}
                         </div>
+                      </Link>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <div className={`text-xs font-medium ${isExpired ? 'text-[#FF4444]' : 'text-[#FFAA00]'}`}>
+                          {formatDate(ins.expiryDate)}
+                        </div>
+                        <RequestCertButton
+                          variant="compact"
+                          carrierName={ins.carrierName ?? ''}
+                          contactEmail={contact?.email}
+                          contactName={contact?.name}
+                          insuranceType={ins.type}
+                          policyNumber={ins.policyNumber}
+                          expiryDate={ins.expiryDate}
+                        />
                       </div>
-                      <div className={`text-xs font-medium flex-shrink-0 ${isExpired ? 'text-[#FF4444]' : 'text-[#FFAA00]'}`}>
-                        {formatDate(ins.expiryDate)}
-                      </div>
-                    </Link>
+                    </div>
                   );
                 })}
             </div>

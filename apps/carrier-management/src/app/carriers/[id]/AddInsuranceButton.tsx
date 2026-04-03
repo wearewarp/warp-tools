@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 interface AddInsuranceButtonProps {
   carrierId: string;
@@ -13,6 +14,7 @@ export function AddInsuranceButton({ carrierId }: AddInsuranceButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,11 +44,14 @@ export function AddInsuranceButton({ carrierId }: AddInsuranceButtonProps) {
         const json = await res.json();
         throw new Error(json?.error?.formErrors?.[0] ?? 'Failed to add insurance');
       }
+      toast({ message: 'Insurance certificate added', type: 'success' });
       setOpen(false);
       form.reset();
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const msg = err instanceof Error ? err.message : 'Something went wrong';
+      setError(msg);
+      toast({ message: msg, type: 'error' });
     } finally {
       setLoading(false);
     }

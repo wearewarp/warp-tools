@@ -71,27 +71,28 @@ export default async function CarriersPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Carriers</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-white">Carriers</h1>
           <p className="text-[#8B95A5] text-sm mt-0.5">{allCarriers.length} carriers total</p>
         </div>
         <Link
           href="/carriers/new"
-          className="flex items-center gap-2 px-4 py-2 bg-[#00C650] hover:bg-[#00B347] text-black font-semibold rounded-xl text-sm transition-colors"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#00C650] hover:bg-[#00B347] text-black font-semibold rounded-xl text-sm transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Add Carrier
+          <span className="hidden sm:inline">Add Carrier</span>
+          <span className="sm:hidden">Add</span>
         </Link>
       </div>
 
       {/* Search + Filter (client component) */}
       <CarrierSearch initialSearch={search} initialStatus={status} />
 
-      {/* Table */}
-      <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-hidden mt-4">
+      {/* Desktop Table — hidden on mobile */}
+      <div className="hidden md:block rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-hidden mt-4">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#1A2235]">
@@ -190,6 +191,75 @@ export default async function CarriersPage({ searchParams }: PageProps) {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card List — shown only on mobile */}
+      <div className="md:hidden mt-4 space-y-2">
+        {allCarriers.length === 0 && (
+          <div className="text-center text-[#8B95A5] py-12 text-sm">
+            No carriers found.{' '}
+            <Link href="/carriers/new" className="text-[#00C650] underline">
+              Add your first carrier →
+            </Link>
+          </div>
+        )}
+        {allCarriers.map((carrier) => {
+          const equip: string[] = JSON.parse(carrier.equipmentTypes ?? '[]');
+          const insAlert = insuranceAlerts[carrier.id];
+
+          return (
+            <Link
+              key={carrier.id}
+              href={`/carriers/${carrier.id}`}
+              className="flex items-center gap-3 rounded-2xl bg-[#080F1E] border border-[#1A2235] p-4 active:bg-[#0C1528] transition-colors"
+            >
+              {/* Score ring */}
+              <div className="flex-shrink-0">
+                <ScoreRing score={carrier.overallScore} size={44} />
+              </div>
+
+              {/* Main content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-white truncate">{carrier.name}</div>
+                    {carrier.mcNumber && (
+                      <div className="text-xs text-[#8B95A5] font-mono mt-0.5">MC# {carrier.mcNumber}</div>
+                    )}
+                  </div>
+                  <div className="flex-shrink-0">
+                    <StatusBadge status={carrier.status} />
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                  {/* Equipment chips */}
+                  {equip.slice(0, 2).map((e) => (
+                    <span
+                      key={e}
+                      className="px-1.5 py-0.5 text-[10px] rounded bg-[#0C1528] border border-[#1A2235] text-[#8B95A5]"
+                    >
+                      {equipLabels[e] ?? e}
+                    </span>
+                  ))}
+                  {equip.length > 2 && (
+                    <span className="text-[10px] text-[#8B95A5]">+{equip.length - 2}</span>
+                  )}
+
+                  {/* Insurance status */}
+                  {insAlert ? (
+                    <StatusBadge status={insAlert} />
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-[#00C650]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#00C650]" />
+                      Insured
+                    </span>
+                  )}
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

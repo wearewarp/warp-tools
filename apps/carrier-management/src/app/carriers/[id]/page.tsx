@@ -103,7 +103,7 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
   const tabs = ['overview', 'contacts', 'insurance', 'rates', 'performance'];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       {/* Back */}
       <Link
         href="/carriers"
@@ -114,7 +114,7 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
       </Link>
 
       {/* Header card */}
-      <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] p-6 mb-6">
+      <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] p-4 md:p-6 mb-6">
         <div className="flex items-start gap-5">
           {/* Score ring — larger */}
           <div className="flex-shrink-0">
@@ -122,9 +122,9 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-white">{carrier.name}</h1>
+                <h1 className="text-lg md:text-2xl font-bold text-white">{carrier.name}</h1>
                 <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-1.5">
                   {carrier.mcNumber && (
                     <span className="text-sm text-[#8B95A5] font-mono">MC# {carrier.mcNumber}</span>
@@ -193,7 +193,9 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
       </div>
 
       {/* Tab nav — client component handles switching */}
-      <CarrierDetailTabs activeTab={tab} tabs={tabs} />
+      <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+        <CarrierDetailTabs activeTab={tab} tabs={tabs} />
+      </div>
 
       {/* Tab content */}
       <div className="mt-6">
@@ -300,7 +302,7 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
 
         {/* ── INSURANCE ── */}
         {tab === 'insurance' && (
-          <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-hidden">
+          <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-x-auto">
             {insurance.length === 0 ? (
               <EmptyState message="No insurance certificates on file." />
             ) : (
@@ -353,7 +355,7 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
 
         {/* ── RATES ── */}
         {tab === 'rates' && (
-          <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-hidden">
+          <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-x-auto">
             {rates.length === 0 ? (
               <EmptyState message="No rates on file for this carrier." />
             ) : (
@@ -429,7 +431,7 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
               </div>
             )}
 
-            <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-hidden">
+            <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-x-auto">
               {performance.length === 0 ? (
                 <EmptyState message="No performance records yet. Log a shipment to start tracking." />
               ) : (

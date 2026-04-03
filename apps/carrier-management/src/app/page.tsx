@@ -60,11 +60,11 @@ export default async function DashboardPage() {
   const uniqueExpiringSoonCarriers = new Set(expiringSoon.map((i) => i.carrierId)).size;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-white">Dashboard</h1>
           <p className="text-[#8B95A5] text-sm mt-0.5">Carrier compliance & performance overview</p>
         </div>
         <Link
@@ -132,7 +132,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           {
             label: 'Total Carriers',
@@ -176,9 +176,9 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Top Carriers */}
-        <div className="col-span-3 rounded-2xl bg-[#080F1E] border border-[#1A2235]">
+        <div className="md:col-span-3 rounded-2xl bg-[#080F1E] border border-[#1A2235]">
           <div className="flex items-center justify-between p-5 border-b border-[#1A2235]">
             <h2 className="font-semibold text-white">Top Performers</h2>
             <Link href="/carriers" className="text-xs text-[#00C650] hover:underline">
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Expiring Certs */}
-        <div className="col-span-2 rounded-2xl bg-[#080F1E] border border-[#1A2235]">
+        <div className="md:col-span-2 rounded-2xl bg-[#080F1E] border border-[#1A2235]">
           <div className="flex items-center justify-between p-5 border-b border-[#1A2235]">
             <h2 className="font-semibold text-white">Upcoming Expirations</h2>
           </div>

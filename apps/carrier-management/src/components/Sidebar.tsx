@@ -17,11 +17,25 @@ const nav = [
   { href: '/rates', label: 'Rates', icon: DollarSign },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  /** Mobile-only open state (desktop sidebar is always visible) */
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-[#080F1E] border-r border-[#1A2235]">
+    <aside
+      className={cn(
+        // Base: fixed full-height sidebar
+        'fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-[#080F1E] border-r border-[#1A2235]',
+        // Mobile: slide in/out — desktop: always visible
+        'transition-transform duration-200 ease-in-out',
+        open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      )}
+    >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-[#1A2235]">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#00C650]/10 border border-[#00C650]/20">
@@ -41,6 +55,7 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 active
@@ -59,6 +74,7 @@ export function Sidebar() {
       <div className="px-3 py-4 border-t border-[#1A2235]">
         <Link
           href="/settings"
+          onClick={onClose}
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#8B95A5] hover:bg-[#0C1528] hover:text-white transition-colors"
         >
           <Settings className="h-4 w-4" />

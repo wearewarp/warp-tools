@@ -24,12 +24,12 @@ export function CarrierDetailTabs({ activeTab, tabs }: CarrierDetailTabsProps) {
   };
 
   return (
-    <div className="flex items-center gap-1 p-1 rounded-xl bg-[#080F1E] border border-[#1A2235] w-fit">
+    <div className="flex items-center gap-1 p-1 rounded-xl bg-[#080F1E] border border-[#1A2235] w-max min-w-full md:w-fit md:min-w-0">
       {tabs.map((tab) => (
         <button
           key={tab}
           onClick={() => handleTab(tab)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex-shrink-0 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === tab
               ? 'bg-[#0C1528] text-white border border-[#1A2235]'
               : 'text-[#8B95A5] hover:text-white'

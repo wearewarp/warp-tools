@@ -16,6 +16,7 @@ import { ContactCard } from '@/components/ContactCard';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { CarrierDetailTabs } from './CarrierDetailTabs';
 import { LogPerformanceButton } from './LogPerformanceButton';
+import { Pagination } from '@/components/Pagination';
 import { DeleteCarrierButton } from './DeleteCarrierButton';
 import { Pencil } from 'lucide-react';
 
@@ -42,14 +43,17 @@ const rateTypeLabels: Record<string, string> = {
   per_cwt: '/cwt',
 };
 
+const PERF_PAGE_SIZE = 25;
+
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; page?: string }>;
 }
 
 export default async function CarrierDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const { tab = 'overview' } = await searchParams;
+  const { tab = 'overview', page: pageParam } = await searchParams;
+  const perfPage = Math.max(1, parseInt(pageParam ?? '1', 10));
 
   const [carrier] = await db.select().from(carriers).where(eq(carriers.id, id));
   if (!carrier) notFound();
@@ -431,75 +435,86 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
               </div>
             )}
 
-            <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-x-auto">
-              {performance.length === 0 ? (
-                <EmptyState message="No performance records yet. Log a shipment to start tracking." />
-              ) : (
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#1A2235]">
-                      {['Shipment', 'Date', 'Pickup', 'Delivery', 'Transit Days', 'Comm.', 'Claim', 'Damage', 'Notes'].map((col) => (
-                        <th
-                          key={col}
-                          className="text-left text-xs font-semibold text-[#8B95A5] uppercase tracking-wide px-4 py-3"
-                        >
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1A2235]">
-                    {[...performance].reverse().map((rec) => (
-                      <tr key={rec.id} className="hover:bg-[#0C1528] transition-colors">
-                        <td className="px-4 py-3.5 text-sm text-white font-mono">
-                          {rec.shipmentRef ?? '—'}
-                        </td>
-                        <td className="px-4 py-3.5 text-sm text-[#8B95A5]">
-                          {formatDate(rec.recordedAt)}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          {rec.pickupOnTime == null ? (
-                            <span className="text-sm text-[#8B95A5]">—</span>
-                          ) : (
-                            <OnTimeChip value={rec.pickupOnTime} />
-                          )}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          {rec.deliveryOnTime == null ? (
-                            <span className="text-sm text-[#8B95A5]">—</span>
-                          ) : (
-                            <OnTimeChip value={rec.deliveryOnTime} />
-                          )}
-                        </td>
-                        <td className="px-4 py-3.5 text-sm text-[#8B95A5]">
-                          {rec.transitDays != null ? `${rec.transitDays}d` : '—'}
-                        </td>
-                        <td className="px-4 py-3.5 text-sm text-[#8B95A5]">
-                          {rec.communicationScore != null ? `${rec.communicationScore}/5` : '—'}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          {rec.claimFiled ? (
-                            <span className="text-xs font-medium text-[#FF4444]">Yes</span>
-                          ) : (
-                            <span className="text-xs text-[#8B95A5]">No</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          {rec.damageReported ? (
-                            <span className="text-xs font-medium text-[#FF4444]">Yes</span>
-                          ) : (
-                            <span className="text-xs text-[#8B95A5]">No</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3.5 text-sm text-[#8B95A5] max-w-[160px] truncate">
-                          {rec.notes ?? '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+            {(() => {
+              const sorted = [...performance].reverse();
+              const pageRecs = sorted.slice((perfPage - 1) * PERF_PAGE_SIZE, perfPage * PERF_PAGE_SIZE);
+              return (
+                <>
+                  <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] overflow-x-auto">
+                    {performance.length === 0 ? (
+                      <EmptyState message="No performance records yet. Log a shipment to start tracking." />
+                    ) : (
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-[#1A2235]">
+                            {['Shipment', 'Date', 'Pickup', 'Delivery', 'Transit Days', 'Comm.', 'Claim', 'Damage', 'Notes'].map((col) => (
+                              <th
+                                key={col}
+                                className="text-left text-xs font-semibold text-[#8B95A5] uppercase tracking-wide px-4 py-3"
+                              >
+                                {col}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#1A2235]">
+                          {pageRecs.map((rec) => (
+                            <tr key={rec.id} className="hover:bg-[#0C1528] transition-colors">
+                              <td className="px-4 py-3.5 text-sm text-white font-mono">
+                                {rec.shipmentRef ?? '—'}
+                              </td>
+                              <td className="px-4 py-3.5 text-sm text-[#8B95A5]">
+                                {formatDate(rec.recordedAt)}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                {rec.pickupOnTime == null ? (
+                                  <span className="text-sm text-[#8B95A5]">—</span>
+                                ) : (
+                                  <OnTimeChip value={rec.pickupOnTime} />
+                                )}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                {rec.deliveryOnTime == null ? (
+                                  <span className="text-sm text-[#8B95A5]">—</span>
+                                ) : (
+                                  <OnTimeChip value={rec.deliveryOnTime} />
+                                )}
+                              </td>
+                              <td className="px-4 py-3.5 text-sm text-[#8B95A5]">
+                                {rec.transitDays != null ? `${rec.transitDays}d` : '—'}
+                              </td>
+                              <td className="px-4 py-3.5 text-sm text-[#8B95A5]">
+                                {rec.communicationScore != null ? `${rec.communicationScore}/5` : '—'}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                {rec.claimFiled ? (
+                                  <span className="text-xs font-medium text-[#FF4444]">Yes</span>
+                                ) : (
+                                  <span className="text-xs text-[#8B95A5]">No</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                {rec.damageReported ? (
+                                  <span className="text-xs font-medium text-[#FF4444]">Yes</span>
+                                ) : (
+                                  <span className="text-xs text-[#8B95A5]">No</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3.5 text-sm text-[#8B95A5] max-w-[160px] truncate">
+                                {rec.notes ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                  {performance.length > PERF_PAGE_SIZE && (
+                    <Pagination total={performance.length} page={perfPage} pageSize={PERF_PAGE_SIZE} />
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

@@ -6,6 +6,9 @@ import { ScoreRing } from '@/components/ScoreRing';
 import { StatusBadge } from '@/components/StatusBadge';
 import { formatCurrency } from '@/lib/utils';
 import { RatesSearch } from './RatesSearch';
+import { Pagination } from '@/components/Pagination';
+
+const PAGE_SIZE = 25;
 
 const equipLabels: Record<string, string> = {
   dry_van: 'Dry Van',
@@ -28,6 +31,7 @@ interface PageProps {
     origin?: string;
     dest?: string;
     equipment?: string;
+    page?: string;
   }>;
 }
 
@@ -78,9 +82,12 @@ async function getRates(origin?: string, dest?: string, equipment?: string) {
 }
 
 export default async function RatesPage({ searchParams }: PageProps) {
-  const { origin, dest, equipment } = await searchParams;
+  const { origin, dest, equipment, page: pageParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? '1', 10));
   const results = await getRates(origin, dest, equipment);
   const isFiltered = !!(origin || dest || equipment);
+  const total = results.length;
+  const pageResults = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -136,7 +143,7 @@ export default async function RatesPage({ searchParams }: PageProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1A2235]">
-              {results.map(({ rate, carrier }) => (
+              {pageResults.map(({ rate, carrier }) => (
                 <tr key={rate.id} className="hover:bg-[#0C1528] transition-colors group">
                   <td className="px-4 py-3.5">
                     <Link href={`/carriers/${carrier!.id}?tab=rates`} className="block">
@@ -187,9 +194,7 @@ export default async function RatesPage({ searchParams }: PageProps) {
       </div>
 
       {results.length > 0 && (
-        <p className="mt-3 text-xs text-[#8B95A5]">
-          {results.length} rate{results.length !== 1 ? 's' : ''} found — sorted by performance score
-        </p>
+        <Pagination total={total} page={page} pageSize={PAGE_SIZE} />
       )}
     </div>
   );

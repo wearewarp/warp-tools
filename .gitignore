@@ -1,1 +1,6 @@
-node_modules/\n.next/\n.turbo/\ndist/\n.env*.local
+node_modules/
+.next/
+.turbo/
+dist/
+.env*.local
+.env

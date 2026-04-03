@@ -23,7 +23,6 @@ export function LogPerformanceButton({ carrierId }: LogPerformanceButtonProps) {
     const data = new FormData(form);
 
     const payload = {
-      carrierId,
       shipmentRef: data.get('shipmentRef') as string || undefined,
       pickupOnTime: data.get('pickupOnTime') === 'yes' ? true : data.get('pickupOnTime') === 'no' ? false : null,
       deliveryOnTime: data.get('deliveryOnTime') === 'yes' ? true : data.get('deliveryOnTime') === 'no' ? false : null,
@@ -35,7 +34,7 @@ export function LogPerformanceButton({ carrierId }: LogPerformanceButtonProps) {
     };
 
     try {
-      const res = await fetch('/api/performance', {
+      const res = await fetch(`/api/carriers/${carrierId}/performance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

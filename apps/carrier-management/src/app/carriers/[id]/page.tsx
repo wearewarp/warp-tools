@@ -16,6 +16,8 @@ import { ContactCard } from '@/components/ContactCard';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { CarrierDetailTabs } from './CarrierDetailTabs';
 import { LogPerformanceButton } from './LogPerformanceButton';
+import { DeleteCarrierButton } from './DeleteCarrierButton';
+import { Pencil } from 'lucide-react';
 
 const equipLabels: Record<string, string> = {
   dry_van: 'Dry Van',
@@ -140,7 +142,15 @@ export default async function CarrierDetailPage({ params, searchParams }: PagePr
                 {carrier.safetyRating && carrier.safetyRating !== 'unknown' && (
                   <StatusBadge status={carrier.safetyRating} />
                 )}
+                <Link
+                  href={`/carriers/${carrier.id}/edit`}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0C1528] border border-[#1A2235] hover:border-[#2A3347] text-sm text-[#8B95A5] hover:text-white transition-all"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit
+                </Link>
                 <LogPerformanceButton carrierId={carrier.id} />
+                <DeleteCarrierButton carrierId={carrier.id} carrierName={carrier.name} />
               </div>
             </div>
 

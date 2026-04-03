@@ -1,0 +1,23 @@
+{
+  "name": "warp-tools",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Free, open-source tools for the logistics industry. Built by Warp.",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

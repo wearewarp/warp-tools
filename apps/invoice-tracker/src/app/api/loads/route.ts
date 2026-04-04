@@ -1,53 +1,40 @@
-export const dynamic = 'force-dynamic';
-
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { loads, customers } from '@/db/schema';
-import { LoadsClient } from './LoadsClient';
+import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 
-const PAGE_SIZE = 25;
+const CreateLoadSchema = z.object({
+  loadRef: z.string().min(1, 'Load ref is required'),
+  customerId: z.string().min(1, 'Customer is required'),
+  carrierName: z.string().optional().nullable(),
+  carrierId: z.string().optional().nullable(),
+  origin: z.string().optional().nullable(),
+  destination: z.string().optional().nullable(),
+  revenue: z.number().min(0).default(0),
+  cost: z.number().min(0).default(0),
+  status: z.enum(['booked', 'in_transit', 'delivered', 'invoiced', 'paid', 'cancelled']).default('booked'),
+  pickupDate: z.string().optional().nullable(),
+  deliveryDate: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  invoiceId: z.string().optional().nullable(),
+  carrierPaymentId: z.string().optional().nullable(),
+});
 
-type SortBy =
-  | 'loadRef'
-  | 'customerName'
-  | 'carrierName'
-  | 'origin'
-  | 'destination'
-  | 'revenue'
-  | 'cost'
-  | 'margin'
-  | 'marginPct'
-  | 'status'
-  | 'pickupDate'
-  | 'createdAt';
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const search = searchParams.get('search');
+  const customerFilter = searchParams.get('customer');
+  const carrierFilter = searchParams.get('carrier');
+  const statusFilter = searchParams.get('status');
+  const dateFrom = searchParams.get('dateFrom');
+  const dateTo = searchParams.get('dateTo');
+  const sortBy = searchParams.get('sortBy') ?? 'createdAt';
+  const sortDir = searchParams.get('sortDir') ?? 'desc';
+  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
+  const pageSize = parseInt(searchParams.get('pageSize') ?? '25', 10);
 
-type SortDir = 'asc' | 'desc';
-
-interface PageProps {
-  searchParams: Promise<{
-    search?: string;
-    customer?: string;
-    carrier?: string;
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    sortBy?: string;
-    sortDir?: string;
-    page?: string;
-  }>;
-}
-
-export default async function LoadsPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const search = params.search;
-  const customerFilter = params.customer;
-  const carrierFilter = params.carrier;
-  const statusFilter = params.status;
-  const dateFrom = params.dateFrom;
-  const dateTo = params.dateTo;
-  const sortBy = (params.sortBy as SortBy) || 'createdAt';
-  const sortDir = (params.sortDir as SortDir) || 'desc';
-  const page = Math.max(1, parseInt(params.page ?? '1', 10));
-
+  // Fetch all loads and customers
   const [allLoads, allCustomers] = await Promise.all([
     db.select().from(loads),
     db.select().from(customers),
@@ -55,6 +42,7 @@ export default async function LoadsPage({ searchParams }: PageProps) {
 
   const customerMap = new Map(allCustomers.map((c) => [c.id, c]));
 
+  // Enrich with customer name
   type EnrichedLoad = (typeof allLoads)[0] & { customerName: string };
   let enriched: EnrichedLoad[] = allLoads.map((l) => ({
     ...l,
@@ -111,8 +99,11 @@ export default async function LoadsPage({ searchParams }: PageProps) {
         return mult * (a.revenue - b.revenue);
       case 'cost':
         return mult * (a.cost - b.cost);
-      case 'margin':
-        return mult * ((a.revenue - a.cost) - (b.revenue - b.cost));
+      case 'margin': {
+        const mA = a.revenue - a.cost;
+        const mB = b.revenue - b.cost;
+        return mult * (mA - mB);
+      }
       case 'marginPct': {
         const pA = a.revenue > 0 ? (a.revenue - a.cost) / a.revenue : 0;
         const pB = b.revenue > 0 ? (b.revenue - b.cost) / b.revenue : 0;
@@ -128,27 +119,44 @@ export default async function LoadsPage({ searchParams }: PageProps) {
   });
 
   const total = enriched.length;
-  const paginated = enriched.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginated = enriched.slice((page - 1) * pageSize, page * pageSize);
 
-  // Totals over full filtered set
+  // Totals (over filtered set)
   const totalRevenue = enriched.reduce((s, l) => s + l.revenue, 0);
   const totalCost = enriched.reduce((s, l) => s + l.cost, 0);
   const totalMargin = totalRevenue - totalCost;
   const avgMarginPct = totalRevenue > 0 ? (totalMargin / totalRevenue) * 100 : 0;
 
-  const customerList = allCustomers.map((c) => ({ id: c.id, name: c.name }));
+  return NextResponse.json({
+    loads: paginated,
+    total,
+    page,
+    pageSize,
+    totals: { totalRevenue, totalCost, totalMargin, avgMarginPct },
+    customers: allCustomers.map((c) => ({ id: c.id, name: c.name })),
+  });
+}
 
-  return (
-    <LoadsClient
-      loads={paginated}
-      total={total}
-      page={page}
-      pageSize={PAGE_SIZE}
-      totals={{ totalRevenue, totalCost, totalMargin, avgMarginPct }}
-      customers={customerList}
-      sortBy={sortBy}
-      sortDir={sortDir}
-      searchParams={params as Record<string, string | undefined>}
-    />
-  );
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const parsed = CreateLoadSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  // Verify customer exists
+  const customer = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.id, parsed.data.customerId))
+    .limit(1);
+
+  if (!customer.length) {
+    return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
+  }
+
+  const load = await db.insert(loads).values(parsed.data).returning();
+
+  return NextResponse.json(load[0], { status: 201 });
 }

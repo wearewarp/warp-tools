@@ -44,6 +44,18 @@ services:
       - NODE_ENV=production
     restart: unless-stopped
 
+  load-dispatch:
+    build:
+      context: .
+      dockerfile: apps/load-dispatch/Dockerfile
+    ports:
+      - "3005:3005"
+    volumes:
+      - dispatch-data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
 volumes:
   carrier-data:
     driver: local
@@ -52,4 +64,6 @@ volumes:
   docvault-data:
     driver: local
   docvault-uploads:
+    driver: local
+  dispatch-data:
     driver: local

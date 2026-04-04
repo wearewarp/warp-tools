@@ -33,7 +33,7 @@ Every system works standalone with a local SQLite database. No cloud accounts, n
 | [**Carrier Management**](apps/carrier-management/) | Carrier spreadsheets, expired insurance surprises, guessed performance | ✅ Available |
 | [**Invoice & Payment Tracker**](apps/invoice-tracker/) | Excel aging reports, manual follow-up, lost invoices | ✅ Available |
 | [**Document Vault**](apps/document-vault/) | Email attachments, shared drives, "where's the POD?" | ✅ Available |
-| **Load Board / Dispatch** | Email chains, WhatsApp groups, phone calls | 📋 Planned |
+| [**Load Board / Dispatch**](apps/load-dispatch/) | Email chains, WhatsApp groups, phone calls | ✅ Available |
 | **Dock / Appointment Scheduler** | Phone calls, paper sign-in sheets | 📋 Planned |
 | **Driver & Settlement** | Excel pay calculations, disputes | 📋 Planned |
 | **Rate Management** | Emailed rate sheets, manual comparisons | 📋 Planned |
@@ -67,6 +67,12 @@ cd apps/document-vault
 npm run db:migrate
 npm run db:seed
 npm run dev        # → http://localhost:3004
+
+# Or run load dispatch
+cd apps/load-dispatch
+npm run db:migrate
+npm run db:seed
+npm run dev        # → http://localhost:3005
 ```
 
 ### Option 2: Docker
@@ -77,6 +83,7 @@ cd warp-tools
 docker compose up carrier-management  # → http://localhost:3001
 docker compose up invoice-tracker      # → http://localhost:3003
 docker compose up document-vault        # → http://localhost:3004
+docker compose up load-dispatch          # → http://localhost:3005
 ```
 
 ## Screenshots
@@ -96,7 +103,8 @@ warp-tools/
 ├── apps/
 │   ├── carrier-management/    # Carrier relationship management
 │   ├── invoice-tracker/       # Invoice & payment tracking
-│   └── document-vault/        # Freight document management
+│   ├── document-vault/        # Freight document management
+│   └── load-dispatch/         # Load board & dispatch
 ├── packages/
 │   ├── ui/                    # Shared design system (colors, tokens)
 │   ├── config/                # Shared Tailwind + TypeScript config

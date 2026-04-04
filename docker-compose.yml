@@ -1,0 +1,24 @@
+# Warp Tools — Docker Compose
+#
+# Run a specific system:
+#   docker compose up carrier-management
+#
+# Run all systems:
+#   docker compose up
+
+services:
+  carrier-management:
+    build:
+      context: .
+      dockerfile: apps/carrier-management/Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - carrier-data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+volumes:
+  carrier-data:
+    driver: local

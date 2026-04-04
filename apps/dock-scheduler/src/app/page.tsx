@@ -1,19 +1,42 @@
+'use client';
+
 export const dynamic = 'force-dynamic';
 
-import { db } from '@/db';
-import { appointments, dockDoors, facilities } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
-import {
-  formatTime,
-  getAppointmentStatusLabel,
-  getAppointmentStatusColor,
-  formatDuration,
-} from '@/lib/utils';
-import type { AppointmentStatus } from '@/db/schema';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import type { Appointment, AppointmentStatus, DockDoor, Facility } from '@/db/schema';
+import { formatTime, formatDuration, getAppointmentStatusLabel, getAppointmentStatusColor } from '@/lib/utils';
+import { AppointmentDetailModal } from '@/components/AppointmentDetailModal';
+import { DockDoorStatusCard } from '@/components/DockDoorStatusCard';
+import { DwellTimeDisplay } from '@/components/DwellTimeDisplay';
 
-function StatCard({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: string }) {
+interface DockStatusEntry {
+  door: DockDoor;
+  occupant: Appointment | null;
+  status: string;
+}
+
+interface DwellAvgs {
+  today: { avgWait: number | null; avgDock: number | null; avgTotal: number | null };
+  week: { avgTotal: number | null };
+  month: { avgTotal: number | null };
+}
+
+interface SummaryData {
+  facility: Facility;
+  statusCounts: Record<string, number>;
+  dockStatus: DockStatusEntry[];
+  dwellAverages: DwellAvgs;
+  upcoming: Appointment[];
+  lateArrivals: Appointment[];
+  doors: DockDoor[];
+}
+
+function StatCard({ label, value, sub, accent, warn }: {
+  label: string; value: string | number; sub?: string; accent?: string; warn?: boolean;
+}) {
   return (
-    <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] p-5">
+    <div className={`rounded-xl bg-[#080F1E] border p-5 ${warn ? 'border-[#FF4444]/30' : 'border-[#1A2235]'}`}>
       <div className="text-xs text-[#8B95A5] font-medium uppercase tracking-wide mb-1">{label}</div>
       <div className="text-2xl font-bold" style={{ color: accent ?? '#ffffff' }}>{value}</div>
       {sub && <div className="text-xs text-[#8B95A5] mt-1">{sub}</div>}
@@ -21,156 +44,201 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string 
   );
 }
 
-const STATUS_ORDER: AppointmentStatus[] = ['in_progress', 'checked_in', 'scheduled', 'completed', 'no_show', 'cancelled'];
+export default function DashboardPage() {
+  const [data, setData] = useState<SummaryData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [modalAppt, setModalAppt] = useState<Appointment | null>(null);
 
-export default async function DashboardPage() {
-  const today = new Date().toISOString().split('T')[0];
+  const fetchSummary = () => {
+    setLoading(true);
+    fetch('/api/dashboard/summary')
+      .then((r) => r.json())
+      .then((d) => setData(d))
+      .finally(() => setLoading(false));
+  };
 
-  const [facility] = await db.select().from(facilities).limit(1);
-  const allDoors = await db.select().from(dockDoors).orderBy(dockDoors.sort_order);
-  const todayAppts = await db
-    .select()
-    .from(appointments)
-    .where(eq(appointments.scheduled_date, today))
-    .orderBy(appointments.scheduled_time);
+  // Initial load via lazy initializer pattern: fetch in callback, not synchronously
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/dashboard/summary')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) { setData(d); setLoading(false); } });
+    return () => { cancelled = true; };
+  }, []);
 
-  const statusCounts = todayAppts.reduce<Record<string, number>>((acc, a) => {
-    acc[a.status] = (acc[a.status] ?? 0) + 1;
-    return acc;
-  }, {});
+  const handleModalUpdate = (updated: Appointment) => {
+    setModalAppt(updated);
+    fetchSummary();
+  };
 
-  const activeDoors = allDoors.filter((d) => d.status === 'active');
-  const inProgress = todayAppts.filter((a) => a.status === 'in_progress');
-  const checkedIn = todayAppts.filter((a) => a.status === 'checked_in');
-  const upcoming = todayAppts.filter((a) => a.status === 'scheduled');
+  if (loading || !data) {
+    return (
+      <div className="p-6 text-[#8B95A5] text-sm">Loading dashboard…</div>
+    );
+  }
 
-  const completedAppts = todayAppts.filter((a) => a.status === 'completed');
-  const avgDwell =
-    completedAppts.length > 0
-      ? Math.round(
-          completedAppts.reduce((sum, a) => sum + (a.total_dwell_minutes ?? 0), 0) /
-            completedAppts.length
-        )
-      : null;
+  const { facility, statusCounts, dockStatus, dwellAverages, upcoming, lateArrivals, doors } = data;
+  const sc = statusCounts;
+  const total = Object.values(sc).reduce((a, b) => a + b, 0);
 
-  // Latest activity — last 8 non-scheduled, non-upcoming
-  const activityAppts = todayAppts
-    .filter((a) => !['scheduled'].includes(a.status))
-    .sort((a, b) => {
-      const ai = STATUS_ORDER.indexOf(a.status as AppointmentStatus);
-      const bi = STATUS_ORDER.indexOf(b.status as AppointmentStatus);
-      return ai - bi;
-    })
-    .slice(0, 10);
+  const modalDoor = modalAppt ? doors.find((d) => d.id === modalAppt.dock_door_id) ?? null : null;
+
+  const todayLabel = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric',
+  });
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-sm text-[#8B95A5] mt-1">
-          {facility?.name ?? 'Facility'} &mdash;{' '}
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-sm text-[#8B95A5] mt-1">
+            {facility?.name ?? 'Facility'} &mdash; {todayLabel}
+          </p>
+        </div>
+        <Link
+          href="/appointments/new"
+          className="rounded-lg bg-[#00C650] px-4 py-2 text-sm font-medium text-black hover:bg-[#00C650]/90 transition-colors"
+        >
+          + New Appointment
+        </Link>
       </div>
 
-      {/* Alert: checked-in waiting */}
-      {checkedIn.length > 0 && (
+      {/* Late Arrivals Alert */}
+      {lateArrivals.length > 0 && (
+        <div className="rounded-xl border border-[#FF4444]/30 bg-[#FF4444]/5 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5 h-5 w-5 rounded-full bg-[#FF4444]/20 flex items-center justify-center">
+              <span className="text-[#FF4444] text-xs font-bold">!</span>
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-[#FF4444]">
+                {lateArrivals.length} Late Arrival{lateArrivals.length !== 1 ? 's' : ''} — No Check-In
+              </div>
+              <div className="text-xs text-[#8B95A5] mt-0.5">
+                Past scheduled time with no check-in recorded
+              </div>
+              <div className="mt-2 space-y-1">
+                {lateArrivals.slice(0, 5).map((a) => {
+                  const door = doors.find((d) => d.id === a.dock_door_id);
+                  return (
+                    <button
+                      key={a.id}
+                      onClick={() => setModalAppt(a)}
+                      className="block text-xs text-slate-300 hover:text-white"
+                    >
+                      {formatTime(a.scheduled_time)} — {a.carrier_name ?? 'Unknown'} @ {door?.name ?? '—'}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Checked-in waiting alert */}
+      {(sc.checked_in ?? 0) > 0 && (
         <div className="rounded-xl border border-[#FFAA00]/30 bg-[#FFAA00]/5 p-4 flex items-start gap-3">
           <div className="flex-shrink-0 mt-0.5 h-5 w-5 rounded-full bg-[#FFAA00]/20 flex items-center justify-center">
             <span className="text-[#FFAA00] text-xs font-bold">!</span>
           </div>
           <div>
             <div className="text-sm font-semibold text-[#FFAA00]">
-              {checkedIn.length} truck{checkedIn.length !== 1 ? 's' : ''} checked in and waiting for a dock
+              {sc.checked_in} truck{sc.checked_in !== 1 ? 's' : ''} checked in and waiting
             </div>
-            <div className="text-xs text-[#8B95A5] mt-0.5">
-              {checkedIn.map((a) => a.carrier_name ?? a.load_ref ?? `Appt #${a.id}`).join(', ')}
-            </div>
+            <div className="text-xs text-[#8B95A5] mt-0.5">Ready to be assigned to a dock door</div>
           </div>
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Active Doors" value={`${inProgress.length} / ${activeDoors.length}`} sub="in use today" accent="#00C650" />
-        <StatCard label="In Progress" value={inProgress.length} sub="loading/unloading" />
-        <StatCard label="Checked In" value={checkedIn.length} sub="waiting for dock" accent={checkedIn.length > 0 ? '#FFAA00' : undefined} />
-        <StatCard
-          label="Avg Dwell Time"
-          value={avgDwell != null ? formatDuration(avgDwell) : '—'}
-          sub={completedAppts.length > 0 ? `from ${completedAppts.length} completed` : 'no data yet'}
-        />
+      {/* Overview Stats Row */}
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCard label="Total" value={total} sub="today" />
+        <StatCard label="Checked In" value={sc.checked_in ?? 0} sub="waiting" accent={(sc.checked_in ?? 0) > 0 ? '#FFAA00' : undefined} />
+        <StatCard label="In Progress" value={sc.in_progress ?? 0} sub="at dock" accent={(sc.in_progress ?? 0) > 0 ? '#00C650' : undefined} />
+        <StatCard label="Completed" value={sc.completed ?? 0} sub="today" accent="#8B95A5" />
+        <StatCard label="No Show" value={sc.no_show ?? 0} sub="today" warn={(sc.no_show ?? 0) > 0} accent={(sc.no_show ?? 0) > 0 ? '#FF4444' : undefined} />
+        <StatCard label="Scheduled" value={sc.scheduled ?? 0} sub="upcoming" />
       </div>
 
-      {/* Status summary */}
+      {/* Dwell Time Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] p-5">
+          <div className="text-xs text-[#8B95A5] font-medium uppercase tracking-wide mb-1">Avg Wait Today</div>
+          <DwellTimeDisplay minutes={dwellAverages.today.avgWait} />
+          <div className="text-xs text-[#8B95A5] mt-1">check-in to dock start</div>
+        </div>
+        <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] p-5">
+          <div className="text-xs text-[#8B95A5] font-medium uppercase tracking-wide mb-1">Avg Dock Today</div>
+          <DwellTimeDisplay minutes={dwellAverages.today.avgDock} />
+          <div className="text-xs text-[#8B95A5] mt-1">dock start to completion</div>
+        </div>
+        <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] p-5">
+          <div className="text-xs text-[#8B95A5] font-medium uppercase tracking-wide mb-1">Avg Total Today</div>
+          <DwellTimeDisplay minutes={dwellAverages.today.avgTotal} />
+          <div className="text-xs text-[#8B95A5] mt-1">
+            {dwellAverages.week.avgTotal != null
+              ? `week avg: ${formatDuration(dwellAverages.week.avgTotal)}`
+              : 'no week data'}
+          </div>
+        </div>
+      </div>
+
+      {/* Dock Door Status Grid */}
       <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] p-5">
-        <h2 className="text-sm font-semibold text-white mb-4">Today&apos;s Appointments</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {(['scheduled', 'checked_in', 'in_progress', 'completed', 'no_show', 'cancelled'] as AppointmentStatus[]).map((status) => (
-            <div key={status} className="text-center">
-              <div className="text-xl font-bold text-white">{statusCounts[status] ?? 0}</div>
-              <div className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-block border ${getAppointmentStatusColor(status)}`}>
-                {getAppointmentStatusLabel(status)}
-              </div>
-            </div>
+        <h2 className="text-sm font-semibold text-white mb-4">Dock Door Status</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {dockStatus.map(({ door, occupant }) => (
+            <button key={door.id} onClick={() => occupant && setModalAppt(occupant)} className="text-left">
+              <DockDoorStatusCard door={door} occupant={occupant} />
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Dock door overview */}
-      <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] p-5">
-        <h2 className="text-sm font-semibold text-white mb-4">Dock Door Status</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {allDoors.map((door) => {
-            const active = todayAppts.find(
-              (a) => a.dock_door_id === door.id && ['in_progress', 'checked_in'].includes(a.status)
-            );
-            const isActive = door.status === 'active';
-            const isMaint = door.status === 'maintenance';
-            return (
-              <div
-                key={door.id}
-                className={`rounded-lg border p-3 ${
-                  active
-                    ? 'border-[#00C650]/30 bg-[#00C650]/5'
-                    : isMaint
-                    ? 'border-[#FFAA00]/20 bg-[#FFAA00]/5'
-                    : isActive
-                    ? 'border-[#1A2235] bg-[#0C1528]'
-                    : 'border-[#1A2235]/50 bg-[#040810] opacity-50'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-white">{door.name}</span>
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      active ? 'bg-[#00C650]' : isMaint ? 'bg-[#FFAA00]' : isActive ? 'bg-[#1A2235]' : 'bg-[#1A2235]/50'
-                    }`}
-                  />
-                </div>
-                {active ? (
-                  <div>
-                    <div className="text-xs text-[#8B95A5] truncate">{active.carrier_name ?? '—'}</div>
-                    <div className={`text-xs mt-0.5 px-1.5 py-0.5 rounded-full inline-block border ${getAppointmentStatusColor(active.status as AppointmentStatus)}`}>
-                      {getAppointmentStatusLabel(active.status as AppointmentStatus)}
-                    </div>
+      {/* Upcoming — next 2 hours */}
+      {upcoming.length > 0 && (
+        <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#1A2235] flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white">Upcoming — Next 2 Hours</h2>
+            <Link href="/appointments" className="text-xs text-[#00C650] hover:underline">View all</Link>
+          </div>
+          <div className="divide-y divide-[#1A2235]">
+            {upcoming.map((a) => {
+              const door = doors.find((d) => d.id === a.dock_door_id);
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => setModalAppt(a)}
+                  className="w-full text-left px-5 py-3 flex items-center gap-4 hover:bg-[#0C1528] transition-colors"
+                >
+                  <div className="text-sm font-medium text-white w-20 flex-shrink-0">{formatTime(a.scheduled_time)}</div>
+                  <div className="font-mono text-[#00C650] text-xs w-16 flex-shrink-0">{door?.name ?? '—'}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-slate-300 truncate">{a.carrier_name ?? '—'}</div>
+                    <div className="text-xs text-[#8B95A5] truncate">{a.commodity ?? ''}</div>
                   </div>
-                ) : (
-                  <div className="text-xs text-[#8B95A5]">
-                    {isMaint ? 'Maintenance' : isActive ? 'Available' : 'Inactive'}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  <span className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${
+                    a.appointment_type === 'inbound'
+                      ? 'text-blue-400 bg-blue-400/10 border-blue-400/20'
+                      : 'text-purple-400 bg-purple-400/10 border-purple-400/20'
+                  }`}>
+                    {a.appointment_type}
+                  </span>
+                  <div className="text-xs text-[#8B95A5] flex-shrink-0">{formatDuration(a.duration_minutes)}</div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Activity feed */}
+      {/* Activity feed — non-scheduled */}
       <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] overflow-hidden">
         <div className="px-5 py-4 border-b border-[#1A2235]">
-          <h2 className="text-sm font-semibold text-white">Activity</h2>
+          <h2 className="text-sm font-semibold text-white">Today&apos;s Activity</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -180,34 +248,40 @@ export default async function DashboardPage() {
                 <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Time</th>
                 <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Carrier</th>
                 <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Commodity</th>
-                <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Duration</th>
+                <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Dwell</th>
                 <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
-              {activityAppts.map((appt) => {
-                const doorName = allDoors.find((d) => d.id === appt.dock_door_id)?.name ?? '—';
-                return (
-                  <tr key={appt.id} className="border-b border-[#1A2235] last:border-0 hover:bg-[#0C1528] transition-colors">
-                    <td className="px-5 py-3 font-mono text-[#00C650] text-xs">{doorName}</td>
-                    <td className="px-5 py-3 text-slate-300">{formatTime(appt.scheduled_time)}</td>
-                    <td className="px-5 py-3 text-slate-300">{appt.carrier_name ?? '—'}</td>
-                    <td className="px-5 py-3 text-[#8B95A5]">{appt.commodity ?? '—'}</td>
-                    <td className="px-5 py-3 text-[#8B95A5]">
-                      {appt.total_dwell_minutes != null ? formatDuration(appt.total_dwell_minutes) : formatDuration(appt.duration_minutes)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${getAppointmentStatusColor(appt.status as AppointmentStatus)}`}>
-                        {getAppointmentStatusLabel(appt.status as AppointmentStatus)}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-              {activityAppts.length === 0 && (
+              {dockStatus
+                .filter(({ occupant }) => occupant !== null)
+                .map(({ door, occupant }) => {
+                  if (!occupant) return null;
+                  return (
+                    <tr
+                      key={occupant.id}
+                      className="border-b border-[#1A2235] last:border-0 hover:bg-[#0C1528] transition-colors cursor-pointer"
+                      onClick={() => setModalAppt(occupant)}
+                    >
+                      <td className="px-5 py-3 font-mono text-[#00C650] text-xs">{door.name}</td>
+                      <td className="px-5 py-3 text-slate-300">{formatTime(occupant.scheduled_time)}</td>
+                      <td className="px-5 py-3 text-slate-300">{occupant.carrier_name ?? '—'}</td>
+                      <td className="px-5 py-3 text-[#8B95A5]">{occupant.commodity ?? '—'}</td>
+                      <td className="px-5 py-3">
+                        <DwellTimeDisplay minutes={occupant.total_dwell_minutes} />
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${getAppointmentStatusColor(occupant.status as AppointmentStatus)}`}>
+                          {getAppointmentStatusLabel(occupant.status as AppointmentStatus)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              {dockStatus.every(({ occupant }) => !occupant) && (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-[#8B95A5] text-sm">
-                    No activity yet today
+                    All doors currently available
                   </td>
                 </tr>
               )}
@@ -216,50 +290,14 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Upcoming */}
-      {upcoming.length > 0 && (
-        <div className="rounded-xl bg-[#080F1E] border border-[#1A2235] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#1A2235]">
-            <h2 className="text-sm font-semibold text-white">Upcoming Today</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#1A2235]">
-                  <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Door</th>
-                  <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Time</th>
-                  <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Carrier</th>
-                  <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Type</th>
-                  <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Commodity</th>
-                  <th className="text-left px-5 py-3 text-xs text-[#8B95A5] font-medium">Duration</th>
-                </tr>
-              </thead>
-              <tbody>
-                {upcoming.map((appt) => {
-                  const doorName = allDoors.find((d) => d.id === appt.dock_door_id)?.name ?? '—';
-                  return (
-                    <tr key={appt.id} className="border-b border-[#1A2235] last:border-0 hover:bg-[#0C1528] transition-colors">
-                      <td className="px-5 py-3 font-mono text-[#00C650] text-xs">{doorName}</td>
-                      <td className="px-5 py-3 text-slate-300">{formatTime(appt.scheduled_time)}</td>
-                      <td className="px-5 py-3 text-slate-300">{appt.carrier_name ?? '—'}</td>
-                      <td className="px-5 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                          appt.appointment_type === 'inbound'
-                            ? 'text-blue-400 bg-blue-400/10 border-blue-400/20'
-                            : 'text-purple-400 bg-purple-400/10 border-purple-400/20'
-                        }`}>
-                          {appt.appointment_type === 'inbound' ? 'Inbound' : 'Outbound'}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-[#8B95A5]">{appt.commodity ?? '—'}</td>
-                      <td className="px-5 py-3 text-[#8B95A5]">{formatDuration(appt.duration_minutes)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      {/* Detail Modal */}
+      {modalAppt && (
+        <AppointmentDetailModal
+          appointment={modalAppt}
+          door={modalDoor ?? null}
+          onClose={() => setModalAppt(null)}
+          onUpdate={handleModalUpdate}
+        />
       )}
     </div>
   );

@@ -1,0 +1,26 @@
+# Next.js
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Uploads (keep directory structure via .gitkeep)
+uploads/*
+!uploads/.gitkeep
+uploads/thumbnails/*
+!uploads/thumbnails/.gitkeep
+
+# Env
+.env
+.env.local
+.env.production
+
+# Misc
+.DS_Store
+*.log

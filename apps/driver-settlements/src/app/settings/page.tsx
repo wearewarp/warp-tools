@@ -12,7 +12,13 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ds-settings');
+      if (saved) { try { return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }; } catch {} }
+    }
+    return DEFAULT_SETTINGS;
+  });
   const [templates, setTemplates] = useState<DeductionTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,13 +32,12 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('ds-settings');
-    if (saved) setSettings(JSON.parse(saved));
-
+    let cancelled = false;
     fetch('/api/deduction-templates')
       .then((res) => res.json())
-      .then((json) => setTemplates(json.templates))
-      .finally(() => setLoading(false));
+      .then((json) => { if (!cancelled) setTemplates(json.templates); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const saveSettings = () => {
@@ -82,19 +87,19 @@ export default function SettingsPage() {
             className="w-full rounded-lg bg-[#1A2235] border border-[#243050] px-4 py-3 text-lg text-white focus:outline-none"
             placeholder="Company Name"
             value={settings.companyName}
-            onChange={(e) => setSettings((s) => ({ ...s, companyName: e.target.value }))}
+            onChange={(e) => setSettings((s: typeof DEFAULT_SETTINGS) => ({ ...s, companyName: e.target.value }))}
           />
           <textarea
             className="w-full rounded-lg bg-[#1A2235] border border-[#243050] px-4 py-3 text-white focus:outline-none resize-vertical h-24"
             placeholder="Address"
             value={settings.companyAddress}
-            onChange={(e) => setSettings((s) => ({ ...s, companyAddress: e.target.value }))}
+            onChange={(e) => setSettings((s: typeof DEFAULT_SETTINGS) => ({ ...s, companyAddress: e.target.value }))}
           />
         </div>
         <select
           className="rounded-lg bg-[#1A2235] border border-[#243050] px-4 py-3 text-white focus:outline-none w-fit"
           value={settings.defaultPeriod}
-          onChange={(e) => setSettings((s) => ({ ...s, defaultPeriod: e.target.value as any }))}
+          onChange={(e) => setSettings((s: typeof DEFAULT_SETTINGS) => ({ ...s, defaultPeriod: e.target.value as any }))}
         >
           <option value="weekly">Weekly</option>
           <option value="biweekly">Bi-weekly</option>

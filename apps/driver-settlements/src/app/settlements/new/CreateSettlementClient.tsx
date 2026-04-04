@@ -283,7 +283,7 @@ export function CreateSettlementClient({ drivers, templates }: Props) {
                       <div>• Auto-populates trips in date range not yet assigned to a settlement</div>
                       <div>• Applies active recurring deduction templates</div>
                       <div>• Includes outstanding advances for this driver</div>
-                      <div>• Status starts as 'open' (editable)</div>
+                      <div>• Status starts as &apos;open&apos; (editable)</div>
                     </div>
                   </div>
                 </div>

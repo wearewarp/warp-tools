@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Users, FileText, DollarSign, AlertTriangle, TrendingUp, Clock, Calendar, Settings } from 'lucide-react';
 import { formatCurrency, formatDate, getSettlementStatusLabel } from '@/lib/utils';
 import { SettlementStatusBadge } from '@/components/SettlementStatusBadge';
@@ -176,7 +177,7 @@ export function DashboardSummaryClient() {
 
       {/* Quick actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a href="/settlements" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
+        <Link href="/settlements" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-blue-400/10 group-hover:bg-blue-400/20 flex items-center justify-center transition-colors">
               <FileText className="h-5 w-5 text-blue-400" />
@@ -187,8 +188,8 @@ export function DashboardSummaryClient() {
           <span className="inline-flex items-center gap-1.5 bg-[#00C650] px-3 py-1.5 text-xs font-semibold text-black rounded-lg hover:bg-[#00C650]/90 transition-colors">
             View Settlements →
           </span>
-        </a>
-        <a href="/drivers" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
+        </Link>
+        <Link href="/drivers" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-green-400/10 group-hover:bg-green-400/20 flex items-center justify-center transition-colors">
               <Users className="h-5 w-5 text-green-400" />
@@ -199,8 +200,8 @@ export function DashboardSummaryClient() {
           <span className="inline-flex items-center gap-1.5 bg-[#00C650] px-3 py-1.5 text-xs font-semibold text-black rounded-lg hover:bg-[#00C650]/90 transition-colors">
             Manage Drivers →
           </span>
-        </a>
-        <a href="/reports" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
+        </Link>
+        <Link href="/reports" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-purple-400/10 group-hover:bg-purple-400/20 flex items-center justify-center transition-colors">
               <TrendingUp className="h-5 w-5 text-purple-400" />
@@ -211,8 +212,8 @@ export function DashboardSummaryClient() {
           <span className="inline-flex items-center gap-1.5 bg-[#00C650] px-3 py-1.5 text-xs font-semibold text-black rounded-lg hover:bg-[#00C650]/90 transition-colors">
             View Reports →
           </span>
-        </a>
-        <a href="/settings" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
+        </Link>
+        <Link href="/settings" className="group rounded-xl bg-[#080F1E] border border-[#1A2235] p-5 hover:bg-[#0C1528] transition-all">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-orange-400/10 group-hover:bg-orange-400/20 flex items-center justify-center transition-colors">
               <Settings className="h-5 w-5 text-orange-400" />
@@ -223,7 +224,7 @@ export function DashboardSummaryClient() {
           <span className="inline-flex items-center gap-1.5 bg-[#00C650] px-3 py-1.5 text-xs font-semibold text-black rounded-lg hover:bg-[#00C650]/90 transition-colors">
             Configure →
           </span>
-        </a>
+        </Link>
       </div>
     </div>
   );

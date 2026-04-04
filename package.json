@@ -17,6 +17,7 @@
   "devDependencies": {
     "turbo": "^2"
   },
+  "packageManager": "npm@11.9.0",
   "engines": {
     "node": ">=20"
   }

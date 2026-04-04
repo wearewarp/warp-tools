@@ -113,9 +113,10 @@ Logistics domain logic that multiple systems need:
 3. **Server Components** — Data fetching happens on the server. Client Components only for interactivity.
 4. **Type-safe end-to-end** — Drizzle schema → TypeScript types → Zod validation → API responses.
 
-For detailed visual specifications (colors, typography, spacing, component patterns, interaction patterns, responsive rules), see [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md).
 5. **Progressive disclosure** — Works simply out of the box, power features reveal as needed.
 6. **Mobile responsive** — Card layouts on small screens, tables on large screens, collapsible sidebar.
+
+For detailed visual specifications (colors, typography, spacing, component patterns, interaction patterns, responsive rules), see [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md).
 
 ## Where to Put Code
 

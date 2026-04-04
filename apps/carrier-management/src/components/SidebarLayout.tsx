@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { Menu, Zap } from 'lucide-react';
 import { Sidebar } from './Sidebar';
@@ -9,10 +9,13 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close sidebar on route change (mobile nav)
-  useEffect(() => {
+  const closeSidebar = useCallback(() => {
     setOpen(false);
-  }, [pathname]);
+  }, []);
+
+  // Close sidebar on route change (mobile nav)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(closeSidebar, [pathname]);
 
   return (
     <div className="flex h-screen overflow-hidden">

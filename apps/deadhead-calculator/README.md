@@ -15,6 +15,10 @@ Calculate the true cost of empty miles so you can decide whether a load is worth
 - **Route summary**: Current → Pickup → Delivery
 - **Comparison mode**: Compare multiple loads side by side
 
+## Screenshot
+
+![Deadhead Calculator](screenshots/deadhead-calculator.png)
+
 ## Quick Start
 
 ```bash

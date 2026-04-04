@@ -12,6 +12,17 @@ Free, open-source driver pay tracking, settlement processing, and payroll manage
 - **Advances** — Track cash advances and deduct from future settlements
 - **Reports** — Pay period summaries and driver earnings analytics
 
+## Screenshots
+
+![Dashboard](screenshots/driver-dashboard.png)
+![Driver List](screenshots/driver-list.png)
+![Driver Detail](screenshots/driver-detail.png)
+![Settlement List](screenshots/settlement-list.png)
+![Settlement Detail](screenshots/settlement-detail.png)
+![Create Settlement](screenshots/settlement-create.png)
+![Reports](screenshots/driver-reports.png)
+![Mobile View](screenshots/driver-mobile.png)
+
 ## Quick Start
 
 ```bash

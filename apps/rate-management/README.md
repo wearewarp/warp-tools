@@ -12,6 +12,16 @@
 - ✅ Analytics: rate trends, equipment averages, margin breakdown
 - ✅ Dark theme, mobile responsive
 
+## Screenshots
+
+![Dashboard](screenshots/rate-dashboard.png)
+![Lane Rates](screenshots/rate-lanes.png)
+![Rate Comparison](screenshots/rate-compare.png)
+![Analytics](screenshots/rate-analytics.png)
+![RFQ List](screenshots/rate-rfqs.png)
+![RFQ Detail](screenshots/rate-rfq-detail.png)
+![Mobile View](screenshots/rate-mobile.png)
+
 ## Quick Start
 ```bash
 cd apps/rate-management && npm install && npm run db:migrate && npm run db:seed && npm run dev

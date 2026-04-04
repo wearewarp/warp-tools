@@ -29,6 +29,10 @@ Part of [Warp Tools](https://github.com/dasokolovsky/warp-tools).
 
 ---
 
+## Screenshot
+
+![Detention Calculator](screenshots/detention-calculator.png)
+
 ## Quick Start
 
 ```bash

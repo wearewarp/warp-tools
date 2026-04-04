@@ -20,6 +20,10 @@ Generates professional, print-ready rate confirmation documents instantly. Enter
 - 📁 **Templates** — save and reload form templates from localStorage
 - 🏢 **Company Persistence** — your broker info saves automatically to localStorage
 
+## Screenshot
+
+![Rate Con Generator](screenshots/rate-con-generator.png)
+
 ## Getting Started
 
 ```bash

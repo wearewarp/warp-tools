@@ -11,6 +11,10 @@ Free, open-source freight broker margin calculator. Built with Next.js, Tailwind
 - **Quick Compare** — Enter one sell rate and multiple carrier buy rates. Best option automatically highlighted.
 - **Batch Calculator** — Process multiple loads at once. Paste from spreadsheet. Totals row with average margin.
 
+## Screenshot
+
+![Margin Calculator](screenshots/margin-calculator.png)
+
 ## Getting Started
 
 ```bash

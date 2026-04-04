@@ -18,6 +18,16 @@
 - 🔲 SMS/email check call reminders
 - 🔲 Map visualization of active loads
 
+## Screenshots
+
+![Dashboard](screenshots/dispatch-dashboard.png)
+![Kanban Board](screenshots/dispatch-kanban.png)
+![Table View](screenshots/dispatch-table.png)
+![Load Detail](screenshots/dispatch-detail.png)
+![Create Load](screenshots/dispatch-create.png)
+![Templates](screenshots/dispatch-templates.png)
+![Mobile View](screenshots/dispatch-mobile.png)
+
 ## Quick Start
 ```bash
 git clone https://github.com/dasokolovsky/warp-tools

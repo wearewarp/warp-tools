@@ -15,6 +15,17 @@
 - ✅ CSV export
 - ✅ Dark theme, mobile responsive
 
+## Screenshots
+
+![Dashboard](screenshots/tms-dashboard.png)
+![Kanban Board](screenshots/tms-kanban.png)
+![Shipment List](screenshots/tms-list.png)
+![Shipment Detail](screenshots/tms-detail.png)
+![Creation Wizard](screenshots/tms-wizard.png)
+![Reports](screenshots/tms-reports.png)
+![Carriers](screenshots/tms-carriers.png)
+![Mobile View](screenshots/tms-mobile.png)
+
 ## Quick Start
 ```bash
 cd apps/shipment-management && npm install && npm run db:migrate && npm run db:seed && npm run dev

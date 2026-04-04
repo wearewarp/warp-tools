@@ -16,6 +16,17 @@
 - 🔲 Carrier self-service portal
 - 🔲 SMS/email appointment confirmations
 
+## Screenshots
+
+![Dashboard](screenshots/dock-dashboard.png)
+![Calendar Day View](screenshots/dock-calendar-day.png)
+![Calendar Week View](screenshots/dock-calendar-week.png)
+![Appointments](screenshots/dock-appointments.png)
+![Create Appointment](screenshots/dock-create.png)
+![Reports](screenshots/dock-reports.png)
+![Settings](screenshots/dock-settings.png)
+![Mobile View](screenshots/dock-mobile.png)
+
 ## Quick Start
 ```bash
 git clone https://github.com/dasokolovsky/warp-tools

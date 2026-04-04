@@ -13,6 +13,10 @@ Free, open-source net pay calculator for truck drivers. No account or database r
 - **Visual breakdown bar** — see where your money goes at a glance
 - **Print Statement** — clean printable PDF with company header, driver name, period, and itemized breakdown
 
+## Screenshot
+
+![Settlement Calculator](screenshots/settlement-calculator.png)
+
 ## Getting Started
 
 ```bash

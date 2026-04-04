@@ -6,6 +6,10 @@ True cost-per-load analysis for trucking companies and owner-operators. Goes bey
 
 **Port:** 3015
 
+## Screenshot
+
+![Load Profitability](screenshots/load-profitability.png)
+
 ## Features
 
 ### Revenue Tracking

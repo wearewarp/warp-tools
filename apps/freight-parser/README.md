@@ -32,6 +32,10 @@ Upload a freight document (PDF or image) or paste raw text → the parser scans 
 
 ---
 
+## Screenshot
+
+![Freight Parser](screenshots/freight-parser.png)
+
 ## ⚠️ v1 — Pattern Matching Only
 
 **This is v1.** It uses regex-based pattern matching — no AI, no LLM, no external APIs.

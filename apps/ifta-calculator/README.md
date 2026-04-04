@@ -13,6 +13,10 @@
 - ✅ No account needed — runs entirely in your browser
 - ✅ Dark theme
 
+## Screenshot
+
+![IFTA Calculator](screenshots/ifta-calculator.png)
+
 ## Quick Start
 
 ```bash

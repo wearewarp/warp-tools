@@ -18,6 +18,15 @@
 - 🔲 OCR text extraction
 - 🔲 Integration with Carrier Management & Invoice Tracker
 
+## Screenshots
+
+![Dashboard](screenshots/docvault-dashboard.png)
+![Documents Grid](screenshots/docvault-documents.png)
+![Document Detail](screenshots/docvault-detail.png)
+![Load Documents](screenshots/docvault-loads.png)
+![Settings](screenshots/docvault-settings.png)
+![Mobile View](screenshots/docvault-dashboard-mobile.png)
+
 ## Quick Start
 
 ```bash

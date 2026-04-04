@@ -19,6 +19,20 @@ services:
       - NODE_ENV=production
     restart: unless-stopped
 
+  invoice-tracker:
+    build:
+      context: .
+      dockerfile: apps/invoice-tracker/Dockerfile
+    ports:
+      - "3003:3003"
+    volumes:
+      - invoice-data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
 volumes:
   carrier-data:
+    driver: local
+  invoice-data:
     driver: local

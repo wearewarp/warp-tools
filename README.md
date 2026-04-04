@@ -31,7 +31,7 @@ Every system works standalone with a local SQLite database. No cloud accounts, n
 | System | What It Replaces | Status |
 |--------|-----------------|--------|
 | [**Carrier Management**](apps/carrier-management/) | Carrier spreadsheets, expired insurance surprises, guessed performance | ✅ Available |
-| **Invoice & Payment Tracker** | Excel aging reports, manual follow-up, lost invoices | 📋 Planned |
+| [**Invoice & Payment Tracker**](apps/invoice-tracker/) | Excel aging reports, manual follow-up, lost invoices | ✅ Available |
 | **Document Vault** | Email attachments, shared drives, "where's the POD?" | 📋 Planned |
 | **Load Board / Dispatch** | Email chains, WhatsApp groups, phone calls | 📋 Planned |
 | **Dock / Appointment Scheduler** | Phone calls, paper sign-in sheets | 📋 Planned |
@@ -55,6 +55,12 @@ cd apps/carrier-management
 npm run db:migrate
 npm run db:seed    # Optional: sample data
 npm run dev        # → http://localhost:3001
+
+# Or run invoice tracker
+cd apps/invoice-tracker
+npm run db:migrate
+npm run db:seed
+npm run dev        # → http://localhost:3003
 ```
 
 ### Option 2: Docker
@@ -62,8 +68,8 @@ npm run dev        # → http://localhost:3001
 ```bash
 git clone https://github.com/dasokolovsky/warp-tools.git
 cd warp-tools
-docker compose up carrier-management
-# → http://localhost:3001
+docker compose up carrier-management  # → http://localhost:3001
+docker compose up invoice-tracker      # → http://localhost:3003
 ```
 
 ## Screenshots
@@ -81,7 +87,8 @@ docker compose up carrier-management
 ```
 warp-tools/
 ├── apps/
-│   └── carrier-management/    # Standalone Next.js app
+│   ├── carrier-management/    # Carrier relationship management
+│   └── invoice-tracker/       # Invoice & payment tracking
 ├── packages/
 │   ├── ui/                    # Shared design system (colors, tokens)
 │   ├── config/                # Shared Tailwind + TypeScript config

@@ -37,7 +37,7 @@ Every system works standalone with a local SQLite database. No cloud accounts, n
 | [**Dock / Appointment Scheduler**](apps/dock-scheduler/) | Phone calls, paper sign-in sheets | ✅ Available |
 | [**Driver & Settlement**](apps/driver-settlements/) | Excel pay calculations, disputes | ✅ Available |
 | [**Rate Management**](apps/rate-management/) | Emailed rate sheets, manual comparisons | ✅ Available |
-| **Mini TMS** | All of the above glued together | 📋 Planned |
+| [**Mini TMS**](apps/shipment-management/) | All of the above glued together | ✅ Available |
 
 Each system works standalone. Together they're a platform — systems share carriers, rates, documents, and invoices across a unified schema.
 
@@ -114,7 +114,8 @@ warp-tools/
 │   ├── load-dispatch/         # Load board & dispatch
 │   ├── dock-scheduler/        # Dock door appointment scheduling
 │   ├── driver-settlements/    # Driver pay & settlement management
-│   └── rate-management/       # Lane rates, carrier pricing, RFQs
+│   ├── rate-management/       # Lane rates, carrier pricing, RFQs
+│   └── shipment-management/   # Mini TMS — unified shipment lifecycle
 ├── packages/
 │   ├── ui/                    # Shared design system (colors, tokens)
 │   ├── config/                # Shared Tailwind + TypeScript config

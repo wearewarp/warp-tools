@@ -10,7 +10,10 @@ interface CustomerFormData {
   billingContact: string;
   email: string;
   phone: string;
-  address: string;
+  addressStreet: string;
+  addressCity: string;
+  addressState: string;
+  addressZip: string;
   paymentTerms: 'net_15' | 'net_30' | 'net_45' | 'net_60' | 'quick_pay' | 'factored';
   creditLimit: string;
   notes: string;
@@ -48,7 +51,10 @@ export function CustomerForm({ mode, customerId, initialData }: CustomerFormProp
     billingContact: initialData?.billingContact ?? '',
     email: initialData?.email ?? '',
     phone: initialData?.phone ?? '',
-    address: initialData?.address ?? '',
+    addressStreet: initialData?.addressStreet ?? '',
+    addressCity: initialData?.addressCity ?? '',
+    addressState: initialData?.addressState ?? '',
+    addressZip: initialData?.addressZip ?? '',
     paymentTerms: initialData?.paymentTerms ?? 'net_30',
     creditLimit: initialData?.creditLimit ?? '',
     notes: initialData?.notes ?? '',
@@ -69,7 +75,10 @@ export function CustomerForm({ mode, customerId, initialData }: CustomerFormProp
       billingContact: form.billingContact || null,
       email: form.email || null,
       phone: form.phone || null,
-      address: form.address || null,
+      addressStreet: form.addressStreet || null,
+      addressCity: form.addressCity || null,
+      addressState: form.addressState || null,
+      addressZip: form.addressZip || null,
       paymentTerms: form.paymentTerms,
       creditLimit: form.creditLimit ? parseFloat(form.creditLimit) : null,
       notes: form.notes || null,
@@ -171,15 +180,45 @@ export function CustomerForm({ mode, customerId, initialData }: CustomerFormProp
       {/* Address */}
       <div className="rounded-2xl bg-[#080F1E] border border-[#1A2235] p-5 space-y-4">
         <h2 className="text-sm font-semibold text-white">Address</h2>
-        <Field label="Full Address">
+        <Field label="Street Address">
           <input
             type="text"
-            value={form.address}
-            onChange={(e) => set('address', e.target.value)}
-            placeholder="8800 Commerce Park Dr, Dallas, TX 75247"
+            value={form.addressStreet}
+            onChange={(e) => set('addressStreet', e.target.value)}
+            placeholder="8800 Commerce Park Dr"
             className={inputClass}
           />
         </Field>
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="City">
+            <input
+              type="text"
+              value={form.addressCity}
+              onChange={(e) => set('addressCity', e.target.value)}
+              placeholder="Dallas"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="State">
+            <input
+              type="text"
+              value={form.addressState}
+              onChange={(e) => set('addressState', e.target.value)}
+              placeholder="TX"
+              maxLength={2}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="ZIP">
+            <input
+              type="text"
+              value={form.addressZip}
+              onChange={(e) => set('addressZip', e.target.value)}
+              placeholder="75247"
+              className={inputClass}
+            />
+          </Field>
+        </div>
       </div>
 
       {/* Billing */}

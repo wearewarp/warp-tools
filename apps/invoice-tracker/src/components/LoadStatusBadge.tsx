@@ -1,12 +1,11 @@
-type LoadStatus = 'booked' | 'in_transit' | 'delivered' | 'invoiced' | 'paid' | 'cancelled';
+type LoadStatus = 'booked' | 'in_transit' | 'delivered' | 'invoiced' | 'closed';
 
 const STATUS_CONFIG: Record<LoadStatus, { label: string; color: string; bg: string }> = {
   booked:     { label: 'Booked',     color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.12)' },
   in_transit: { label: 'In Transit', color: '#4B8EE8', bg: 'rgba(75, 142, 232, 0.12)' },
   delivered:  { label: 'Delivered',  color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.12)' },
   invoiced:   { label: 'Invoiced',   color: '#00C650', bg: 'rgba(0, 198, 80, 0.12)' },
-  paid:       { label: 'Paid',       color: '#00C650', bg: 'rgba(0, 198, 80, 0.18)' },
-  cancelled:  { label: 'Cancelled',  color: '#6B7280', bg: 'rgba(107, 114, 128, 0.12)' },
+  closed:     { label: 'Closed',     color: '#64748B', bg: 'rgba(100, 116, 139, 0.15)' },
 };
 
 interface LoadStatusBadgeProps {

@@ -23,7 +23,10 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
       customerName: customers.name,
       customerEmail: customers.email,
       customerPhone: customers.phone,
-      customerAddress: customers.address,
+      customerAddressStreet: customers.addressStreet,
+      customerAddressCity: customers.addressCity,
+      customerAddressState: customers.addressState,
+      customerAddressZip: customers.addressZip,
       customerPaymentTerms: customers.paymentTerms,
     })
     .from(invoices)
@@ -42,6 +45,13 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
     .from(paymentsReceived)
     .where(eq(paymentsReceived.invoiceId, id));
 
+  const addrParts = [
+    row.customerAddressStreet,
+    row.customerAddressCity,
+    [row.customerAddressState, row.customerAddressZip].filter(Boolean).join(' '),
+  ].filter(Boolean);
+  const customerAddress = addrParts.length > 0 ? addrParts.join(', ') : null;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const due = new Date(row.invoice.dueDate);
@@ -58,7 +68,7 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
     customerName: row.customerName,
     customerEmail: row.customerEmail,
     customerPhone: row.customerPhone,
-    customerAddress: row.customerAddress,
+    customerAddress: customerAddress,
     customerPaymentTerms: row.customerPaymentTerms,
     lineItems,
     payments,

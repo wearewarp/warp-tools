@@ -14,7 +14,10 @@ export const customers = sqliteTable('customers', {
   billingContact: text('billing_contact'),
   email: text('email'),
   phone: text('phone'),
-  address: text('address'),
+  addressStreet: text('address_street'),
+  addressCity: text('address_city'),
+  addressState: text('address_state'),
+  addressZip: text('address_zip'),
   paymentTerms: text('payment_terms', {
     enum: ['net_15', 'net_30', 'net_45', 'net_60', 'quick_pay', 'factored'],
   }).default('net_30').notNull(),
@@ -109,7 +112,7 @@ export const loads = sqliteTable('loads', {
   invoiceId: text('invoice_id').references(() => invoices.id, { onDelete: 'set null' }),
   carrierPaymentId: text('carrier_payment_id').references(() => carrierPayments.id, { onDelete: 'set null' }),
   status: text('status', {
-    enum: ['booked', 'in_transit', 'delivered', 'invoiced', 'paid', 'cancelled'],
+    enum: ['booked', 'in_transit', 'delivered', 'invoiced', 'closed'],
   }).default('booked').notNull(),
   pickupDate: text('pickup_date'),
   deliveryDate: text('delivery_date'),

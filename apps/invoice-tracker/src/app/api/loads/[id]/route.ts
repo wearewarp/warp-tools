@@ -13,7 +13,7 @@ const UpdateLoadSchema = z.object({
   destination: z.string().optional().nullable(),
   revenue: z.number().min(0).optional(),
   cost: z.number().min(0).optional(),
-  status: z.enum(['booked', 'in_transit', 'delivered', 'invoiced', 'paid', 'cancelled']).optional(),
+  status: z.enum(['booked', 'in_transit', 'delivered', 'invoiced', 'closed']).optional(),
   pickupDate: z.string().optional().nullable(),
   deliveryDate: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),

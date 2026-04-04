@@ -187,8 +187,7 @@ export function QuickCreateLoadModal({ open, onClose, onSuccess, customers, pref
                 <option value="in_transit">In Transit</option>
                 <option value="delivered">Delivered</option>
                 <option value="invoiced">Invoiced</option>
-                <option value="paid">Paid</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="closed">Closed</option>
               </select>
             </div>
           </div>

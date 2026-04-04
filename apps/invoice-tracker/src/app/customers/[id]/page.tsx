@@ -79,10 +79,14 @@ export default async function CustomerDetailPage({ params, searchParams }: PageP
                   {customer.phone}
                 </a>
               )}
-              {customer.address && (
+              {(customer.addressStreet || customer.addressCity) && (
                 <span className="flex items-center gap-1.5 text-sm text-[#8B95A5]">
                   <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                  {customer.address}
+                  {[
+                    customer.addressStreet,
+                    customer.addressCity,
+                    [customer.addressState, customer.addressZip].filter(Boolean).join(' '),
+                  ].filter(Boolean).join(', ')}
                 </span>
               )}
             </div>
@@ -145,7 +149,13 @@ export default async function CustomerDetailPage({ params, searchParams }: PageP
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <dt className="text-xs text-[#8B95A5] flex-shrink-0">Address</dt>
-                  <dd className="text-sm text-white text-right">{customer.address ?? '—'}</dd>
+                  <dd className="text-sm text-white text-right">
+                    {[
+                      customer.addressStreet,
+                      customer.addressCity,
+                      [customer.addressState, customer.addressZip].filter(Boolean).join(' '),
+                    ].filter(Boolean).join(', ') || '—'}
+                  </dd>
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <dt className="text-xs text-[#8B95A5] flex-shrink-0">Payment Terms</dt>

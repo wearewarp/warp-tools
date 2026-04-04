@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Pencil, Send, Trash2, Mail, Plus, Pencil as PencilIcon, X
+  Pencil, Send, Trash2, Mail, Plus, Pencil as PencilIcon, X, Printer
 } from 'lucide-react';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
 import { LineTypeBadge } from '@/components/LineTypeBadge';
@@ -246,6 +246,14 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: { invoice: Invo
             Send Invoice
           </a>
         )}
+        <Link
+          href={`/invoices/${invoice.id}/print`}
+          target="_blank"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#0C1528] hover:bg-[#1A2235] text-[#8B95A5] hover:text-white border border-[#1A2235] rounded-xl text-sm font-medium transition-colors"
+        >
+          <Printer className="h-4 w-4" />
+          Print / PDF
+        </Link>
         {!isVoid && (
           <button
             onClick={() => setShowVoidConfirm(true)}

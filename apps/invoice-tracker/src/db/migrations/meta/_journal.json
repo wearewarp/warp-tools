@@ -8,6 +8,13 @@
       "when": 1775267119026,
       "tag": "0000_clumsy_valkyrie",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775272246387,
+      "tag": "0001_address_split_and_status_rename",
+      "breakpoints": true
     }
   ]
 }

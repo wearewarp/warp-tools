@@ -34,7 +34,7 @@ Every system works standalone with a local SQLite database. No cloud accounts, n
 | [**Invoice & Payment Tracker**](apps/invoice-tracker/) | Excel aging reports, manual follow-up, lost invoices | ✅ Available |
 | [**Document Vault**](apps/document-vault/) | Email attachments, shared drives, "where's the POD?" | ✅ Available |
 | [**Load Board / Dispatch**](apps/load-dispatch/) | Email chains, WhatsApp groups, phone calls | ✅ Available |
-| **Dock / Appointment Scheduler** | Phone calls, paper sign-in sheets | 📋 Planned |
+| [**Dock / Appointment Scheduler**](apps/dock-scheduler/) | Phone calls, paper sign-in sheets | ✅ Available |
 | **Driver & Settlement** | Excel pay calculations, disputes | 📋 Planned |
 | **Rate Management** | Emailed rate sheets, manual comparisons | 📋 Planned |
 | **Mini TMS** | All of the above glued together | 📋 Planned |
@@ -73,6 +73,12 @@ cd apps/load-dispatch
 npm run db:migrate
 npm run db:seed
 npm run dev        # → http://localhost:3005
+
+# Or run dock scheduler
+cd apps/dock-scheduler
+npm run db:migrate
+npm run db:seed
+npm run dev        # → http://localhost:3006
 ```
 
 ### Option 2: Docker
@@ -84,6 +90,7 @@ docker compose up carrier-management  # → http://localhost:3001
 docker compose up invoice-tracker      # → http://localhost:3003
 docker compose up document-vault        # → http://localhost:3004
 docker compose up load-dispatch          # → http://localhost:3005
+docker compose up dock-scheduler          # → http://localhost:3006
 ```
 
 ## Screenshots
@@ -104,7 +111,8 @@ warp-tools/
 │   ├── carrier-management/    # Carrier relationship management
 │   ├── invoice-tracker/       # Invoice & payment tracking
 │   ├── document-vault/        # Freight document management
-│   └── load-dispatch/         # Load board & dispatch
+│   ├── load-dispatch/         # Load board & dispatch
+│   └── dock-scheduler/        # Dock door appointment scheduling
 ├── packages/
 │   ├── ui/                    # Shared design system (colors, tokens)
 │   ├── config/                # Shared Tailwind + TypeScript config

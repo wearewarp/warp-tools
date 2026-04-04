@@ -56,6 +56,18 @@ services:
       - NODE_ENV=production
     restart: unless-stopped
 
+  dock-scheduler:
+    build:
+      context: .
+      dockerfile: apps/dock-scheduler/Dockerfile
+    ports:
+      - "3006:3006"
+    volumes:
+      - dock-data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
 volumes:
   carrier-data:
     driver: local
@@ -66,4 +78,6 @@ volumes:
   docvault-uploads:
     driver: local
   dispatch-data:
+    driver: local
+  dock-data:
     driver: local

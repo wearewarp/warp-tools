@@ -10,6 +10,7 @@
 - ✅ Missing document tracker (know what's missing per load)
 - ✅ Expiring document alerts (insurance certs, authority letters)
 - ✅ Per-load document checklist with completeness tracking
+- ✅ Carrier documents view (docs grouped by type with expiry tracking)
 - ✅ Full-text search across all document metadata
 - ✅ Batch tagging for bulk organization
 - ✅ PDF and image preview
@@ -113,7 +114,7 @@ Next.js 16, Drizzle ORM + SQLite, Tailwind CSS, Sharp (image processing), Zod, T
 - OCR text extraction with Tesseract.js
 - Document version history (re-upload same doc)
 - Email documents as attachments
-- Carrier-specific document portal view
+- ~~Carrier-specific document portal view~~ ✅ Done
 
 ### 🔴 Hard
 

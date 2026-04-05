@@ -4,6 +4,7 @@
 ## Features
 - ✅ Full shipment lifecycle (quote → booked → dispatched → in_transit → delivered → invoiced → paid → closed)
 - ✅ Shipment creation wizard (6-step guided flow)
+- ✅ Shipment edit form (all fields editable)
 - ✅ Kanban board + table view
 - ✅ Shipment health scores
 - ✅ Document completeness tracking (BOL, POD, Rate Con, Invoice)

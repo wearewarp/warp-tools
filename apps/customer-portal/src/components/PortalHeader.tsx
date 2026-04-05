@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 
 interface PortalHeaderProps {
   customerName?: string | null;
+  portalName?: string;
 }
 
-export function PortalHeader({ customerName }: PortalHeaderProps) {
+export function PortalHeader({ customerName, portalName = 'Shipment Portal' }: PortalHeaderProps) {
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter();
 
@@ -30,7 +31,7 @@ export function PortalHeader({ customerName }: PortalHeaderProps) {
           <Truck className="h-4 w-4 text-[#00C650]" />
         </div>
         <span className="text-sm font-semibold text-white hidden sm:block">
-          Shipment Portal
+          {portalName}
         </span>
       </div>
 

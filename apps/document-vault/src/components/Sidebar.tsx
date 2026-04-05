@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   FolderOpen,
   Truck,
+  Building2,
   Settings,
   Zap,
 } from 'lucide-react';
@@ -15,6 +16,7 @@ const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/documents', label: 'Documents', icon: FolderOpen },
   { href: '/loads', label: 'Loads', icon: Truck },
+  { href: '/carriers', label: 'Carriers', icon: Building2 },
 ];
 
 interface SidebarProps {

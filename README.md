@@ -58,49 +58,50 @@ Single-page calculators and generators — no database, no login, just open and 
 
 ## Quick Start
 
-### Option 1: npm
+### Option 1: npm (any system)
 
 ```bash
 git clone https://github.com/dasokolovsky/warp-tools.git
 cd warp-tools
 npm install
 
-# Run carrier management
-cd apps/carrier-management
-npm run db:migrate
-npm run db:seed    # Optional: sample data
-npm run dev        # → http://localhost:3001
-
-# Or run invoice tracker
-cd apps/invoice-tracker
-npm run db:migrate
-npm run db:seed
-npm run dev        # → http://localhost:3003
-
-# Or run document vault
-cd apps/document-vault
-npm run db:migrate
-npm run db:seed
-npm run dev        # → http://localhost:3004
-
-# Or run load dispatch
-cd apps/load-dispatch
-npm run db:migrate
-npm run db:seed
-npm run dev        # → http://localhost:3005
-
-# Or run dock scheduler
-cd apps/dock-scheduler
-npm run db:migrate
-npm run db:seed
-npm run dev        # → http://localhost:3006
+# Pick any system — they all follow the same pattern:
+cd apps/carrier-management   # or any app below
+npm run db:migrate           # set up SQLite database (systems only)
+npm run db:seed              # optional: load sample data
+npm run dev                  # start dev server
 ```
+
+### Port Reference
+
+| System | Port | Command |
+|--------|------|---------|
+| Carrier Management | 3001 | `cd apps/carrier-management && npm run dev` |
+| Invoice & Payment Tracker | 3003 | `cd apps/invoice-tracker && npm run dev` |
+| Document Vault | 3004 | `cd apps/document-vault && npm run dev` |
+| Load Board / Dispatch | 3005 | `cd apps/load-dispatch && npm run dev` |
+| Dock / Appointment Scheduler | 3006 | `cd apps/dock-scheduler && npm run dev` |
+| Driver & Settlement | 3007 | `cd apps/driver-settlements && npm run dev` |
+| Rate Management | 3008 | `cd apps/rate-management && npm run dev` |
+| Mini TMS (Shipment Management) | 3009 | `cd apps/shipment-management && npm run dev` |
+| IFTA Calculator | 3010 | `cd apps/ifta-calculator && npm run dev` |
+| Detention Calculator | 3011 | `cd apps/detention-calculator && npm run dev` |
+| Margin Calculator | 3012 | `cd apps/margin-calculator && npm run dev` |
+| Deadhead Calculator | 3013 | `cd apps/deadhead-calculator && npm run dev` |
+| Rate Con Generator | 3014 | `cd apps/rate-con-generator && npm run dev` |
+| Load Profitability | 3015 | `cd apps/load-profitability && npm run dev` |
+| Settlement Calculator | 3016 | `cd apps/settlement-calculator && npm run dev` |
+| Freight Parser | 3017 | `cd apps/freight-parser && npm run dev` |
+
+> **Systems** (carrier-management through shipment-management) require `npm run db:migrate` before first run. **Micro-tools** (calculators) have no database — just `npm run dev`.
 
 ### Option 2: Docker
 
 ```bash
 git clone https://github.com/dasokolovsky/warp-tools.git
 cd warp-tools
+
+# Run any system
 docker compose up carrier-management    # → http://localhost:3001
 docker compose up invoice-tracker       # → http://localhost:3003
 docker compose up document-vault        # → http://localhost:3004
@@ -109,21 +110,62 @@ docker compose up dock-scheduler        # → http://localhost:3006
 docker compose up driver-settlements    # → http://localhost:3007
 docker compose up rate-management       # → http://localhost:3008
 docker compose up shipment-management   # → http://localhost:3009
-# Calculators (no database required)
+
+# Run any calculator (no database needed)
 docker compose up ifta-calculator       # → http://localhost:3010
+docker compose up detention-calculator  # → http://localhost:3011
 docker compose up margin-calculator     # → http://localhost:3012
+docker compose up deadhead-calculator   # → http://localhost:3013
+docker compose up rate-con-generator    # → http://localhost:3014
+docker compose up load-profitability    # → http://localhost:3015
+docker compose up settlement-calculator # → http://localhost:3016
 docker compose up freight-parser        # → http://localhost:3017
+
+# Or run everything at once
+docker compose up -d
 ```
 
 ## Screenshots
 
+### Carrier Management
 | Carrier List | Carrier Detail | Compliance Dashboard |
 |:---:|:---:|:---:|
 | ![List](screenshots/carrier-list.png) | ![Detail](screenshots/carrier-detail.png) | ![Dashboard](screenshots/dashboard.png) |
 
-| Add Carrier | Rate Comparison | Mobile |
+### Invoice & Payment Tracker
+| Invoice Dashboard | Invoice List |
+|:---:|:---:|
+| ![Dashboard](screenshots/invoice-dashboard.png) | ![Invoices](screenshots/invoice-list.png) |
+
+### Load Dispatch
+| Dispatch Dashboard | Load Detail | Kanban Board |
 |:---:|:---:|:---:|
-| ![New](screenshots/carrier-new.png) | ![Rates](screenshots/rate-comparison.png) | ![Mobile](screenshots/carrier-list-mobile.png) |
+| ![Dashboard](screenshots/dispatch-dashboard.png) | ![Detail](screenshots/dispatch-detail.png) | ![Kanban](screenshots/dispatch-kanban.png) |
+
+### Document Vault
+| Dashboard | Documents |
+|:---:|:---:|
+| ![Dashboard](screenshots/docvault-dashboard.png) | ![Documents](screenshots/docvault-documents.png) |
+
+### Dock Scheduler
+| Dashboard | Calendar Day View |
+|:---:|:---:|
+| ![Dashboard](screenshots/dock-dashboard.png) | ![Calendar](screenshots/dock-calendar-day.png) |
+
+### Driver & Settlement
+| Driver Dashboard | Settlement Detail |
+|:---:|:---:|
+| ![Dashboard](screenshots/driver-dashboard.png) | ![Settlement](screenshots/settlement-detail.png) |
+
+### Rate Management
+| Rate Dashboard | Rate Comparison |
+|:---:|:---:|
+| ![Dashboard](screenshots/rate-dashboard.png) | ![Compare](screenshots/rate-compare.png) |
+
+### Mini TMS (Shipment Management)
+| TMS Dashboard | Shipment Detail | Kanban Pipeline |
+|:---:|:---:|:---:|
+| ![Dashboard](screenshots/tms-dashboard.png) | ![Detail](screenshots/tms-detail.png) | ![Kanban](screenshots/tms-kanban.png) |
 
 ## Architecture
 
@@ -148,8 +190,7 @@ warp-tools/
 │   └── freight-parser/        # Parse freight docs to structured data
 ├── packages/
 │   ├── ui/                    # Shared design system (colors, tokens)
-│   ├── config/                # Shared Tailwind + TypeScript config
-│   └── freight-core/          # Logistics domain logic (freight classes, density calc)
+│   └── config/                # Shared Tailwind + TypeScript config
 ├── docker-compose.yml         # One-command self-hosting
 ├── ARCHITECTURE.md            # Deep dive into system design
 └── CONTRIBUTING.md            # How to contribute

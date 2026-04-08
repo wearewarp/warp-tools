@@ -168,6 +168,11 @@ docker compose up -d
 |:---:|:---:|
 | ![Dashboard](screenshots/rate-dashboard.png) | ![Compare](screenshots/rate-compare.png) |
 
+### Customer Portal
+| Admin Dashboard | Customer Shipments | Portal Login |
+|:---:|:---:|:---:|
+| ![Admin](screenshots/portal-admin-dashboard.png) | ![Portal](screenshots/portal-shipments.png) | ![Login](screenshots/portal-login.png) |
+
 ### Mini TMS (Shipment Management)
 | TMS Dashboard | Shipment Detail | Kanban Pipeline |
 |:---:|:---:|:---:|

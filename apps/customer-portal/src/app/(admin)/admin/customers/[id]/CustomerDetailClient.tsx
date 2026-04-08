@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Copy, RefreshCw, Pencil, Trash2,
   ToggleLeft, ToggleRight, Package, MessageSquare,
-  User, Mail, Phone, FileText, Send, Plus
+  User, Mail, Phone, FileText, Send, Plus, Clock
 } from 'lucide-react';
 import { showToast } from '@/components/Toast';
 import { formatDate, formatDateTime } from '@/lib/utils';
@@ -67,7 +67,7 @@ interface CustomerDetailClientProps {
 export function CustomerDetailClient({ customer: initial, shipments, messages: initialMessages }: CustomerDetailClientProps) {
   const [customer, setCustomer] = useState(initial);
   const [messages, setMessages] = useState(initialMessages);
-  const [activeTab, setActiveTab] = useState<'shipments' | 'messages'>('shipments');
+  const [activeTab, setActiveTab] = useState<'shipments' | 'messages' | 'activity'>('shipments');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [regenOpen, setRegenOpen] = useState(false);
   const [msgText, setMsgText] = useState('');
@@ -246,6 +246,14 @@ export function CustomerDetailClient({ customer: initial, shipments, messages: i
         >
           <MessageSquare className="h-4 w-4" /> Messages ({messages.length})
         </button>
+        <button
+          onClick={() => setActiveTab('activity')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'activity' ? 'border-[#00C650] text-[#00C650]' : 'border-transparent text-[#8B95A5] hover:text-white'
+          }`}
+        >
+          <Clock className="h-4 w-4" /> Activity
+        </button>
       </div>
 
       {/* Shipments Tab */}
@@ -350,6 +358,57 @@ export function CustomerDetailClient({ customer: initial, shipments, messages: i
           </div>
         </div>
       )}
+
+      {/* Activity Tab */}
+      {activeTab === 'activity' && (() => {
+        const activityItems = [
+          ...(customer.lastLoginAt ? [{
+            id: 'login',
+            type: 'login',
+            description: 'Logged into portal',
+            createdAt: customer.lastLoginAt,
+          }] : []),
+          ...messages
+            .filter(m => m.senderType === 'customer')
+            .map(m => ({
+              id: m.id,
+              type: 'send_message',
+              description: `Sent a message: "${m.message.substring(0, 60)}${m.message.length > 60 ? '...' : ''}"`,
+              createdAt: m.createdAt,
+            })),
+        ].sort((a, b) => {
+          if (!a.createdAt || !b.createdAt) return 0;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+
+        return (
+          <div className="rounded-xl border border-[#1A2235] bg-[#080F1E] overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#1A2235]">
+              <h2 className="text-sm font-semibold text-white">Portal Activity</h2>
+            </div>
+            {activityItems.length === 0 ? (
+              <div className="p-8 text-center">
+                <Clock className="h-8 w-8 text-[#8B95A5] mx-auto mb-2" />
+                <p className="text-sm text-[#8B95A5]">No activity recorded yet.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#1A2235]">
+                {activityItems.map((item) => (
+                  <div key={item.id} className="flex items-start gap-3 px-5 py-3">
+                    <div className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${
+                      item.type === 'login' ? 'bg-blue-400' : 'bg-[#00C650]'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-200">{item.description}</p>
+                      <p className="text-xs text-[#8B95A5]">{item.createdAt ? formatDateTime(item.createdAt) : '\u2014'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Metadata */}
       <div className="mt-4 rounded-xl border border-[#1A2235] bg-[#080F1E] p-5">

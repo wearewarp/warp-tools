@@ -173,6 +173,11 @@ docker compose up -d
 |:---:|:---:|:---:|
 | ![Admin](screenshots/portal-admin-dashboard.png) | ![Portal](screenshots/portal-shipments.png) | ![Login](screenshots/portal-login.png) |
 
+### Fleet Maintenance
+| Dashboard | Vehicle Detail |
+|:---:|:---:|
+| ![Dashboard](screenshots/fleet-dashboard.png) | ![Detail](screenshots/vehicle-detail.png) |
+
 ### Mini TMS (Shipment Management)
 | TMS Dashboard | Shipment Detail | Kanban Pipeline |
 |:---:|:---:|:---:|

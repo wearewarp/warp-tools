@@ -197,6 +197,7 @@ warp-tools/
 │   ├── rate-management/       # Lane rates, carrier pricing, RFQs
 │   ├── shipment-management/   # Mini TMS — unified shipment lifecycle
 │   ├── customer-portal/       # Customer/shipper tracking portal
+│   ├── fleet-maintenance/     # Fleet maintenance & DVIR management
 │   ├── ifta-calculator/       # IFTA fuel tax calculator
 │   ├── detention-calculator/  # Detention & demurrage charges
 │   ├── margin-calculator/     # Load margin analysis
